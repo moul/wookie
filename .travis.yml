@@ -22,4 +22,4 @@ script:
 - make test
 # - go run ./cmd/wookie/main.go --help || true
 - make cover
-- goveralls -service=travis-ci -v -covermode=count -coverprofile=profile.out%
+- goveralls -service=travis-ci -v -covermode=count -coverprofile=profile.out
