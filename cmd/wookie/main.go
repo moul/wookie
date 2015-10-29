@@ -31,9 +31,12 @@ func main() {
 	input, _ := ioutil.ReadAll(stream)
 	lines := strings.Split(strings.TrimSpace(string(input)), "\n")
 
+	var output string
 	for i := 0; i < *count; i++ {
 		wookie := wookie.NewWookie(lines)
 		wookie.Compute()
-		fmt.Println(wookie.Genome.String())
+		output = wookie.Genome.String()
 	}
+	// only print latest output
+	fmt.Println(output)
 }
