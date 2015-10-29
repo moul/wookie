@@ -79,3 +79,30 @@ TTGTATTTCATTTGATTTTCCCCCGCCCCTCCC`, "\n")
 		So(wookie.Compute(), ShouldBeFalse)
 	})
 }
+
+func TestWookie_Graphviz(t *testing.T) {
+	Convey("Testing Wookie.Graphviz()", t, func() {
+		input := strings.Split(`abcd|efgh|cdef|ghij|bcde`, "|")
+		wookie := NewWookie(input)
+		So(wookie.Compute(), ShouldBeTrue)
+		expected := `digraph G {
+	start->abcd;
+	ghij->end;
+	abcd->bcde[ color=red, label=idx1_len3 ];
+	bcde->cdef[ color=red, label=idx2_len3 ];
+	cdef->efgh[ color=red, label=idx3_len2 ];
+	efgh->ghij[ color=red, label=idx4_len2 ];
+	abcd->cdef[ label=len2 ];
+	abcd [ color=blue ];
+	bcde [ color=blue ];
+	cdef [ color=blue ];
+	efgh [ color=blue ];
+	end [ shape=Msquare ];
+	ghij [ color=blue ];
+	start [ shape=Mdiamond ];
+
+}
+`
+		So(wookie.Graphviz(), ShouldEqual, expected)
+	})
+}

@@ -55,16 +55,12 @@ func (p *Part) CoincideLength(part *Part) int {
 		maxLength = rightLen
 	}
 
-	for i := maxLength; i >= 0; i-- {
+	for i := maxLength; i > 0; i-- {
 		if idx := strings.Index(p.Line[:i], part.Line[rightLen-i:]); idx != -1 {
 			return i
 		}
 	}
 	return -1
-}
-
-func (p *Part) CoincideWith(part *Part, minLength int) bool {
-	return p.CoincideLength(part) >= minLength
 }
 
 func (w *Wookie) Compute() bool {
@@ -87,7 +83,6 @@ func (w *Wookie) Compute() bool {
 			}
 			coincideLength := otherPart.CoincideLength(part)
 			if coincideLength > 0 {
-				//if otherPart.CoincideWith(part, length) {
 				part.Rights[coincideLength] = append(part.Rights[coincideLength], otherPart)
 			}
 		}
