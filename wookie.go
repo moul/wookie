@@ -2,8 +2,6 @@ package wookie
 
 import "strings"
 
-const minLengthMatching = 3
-
 type Part struct {
 	Line   string
 	Rights []*Part
@@ -43,7 +41,7 @@ func NewGenome() Genome {
 	}
 }
 
-func (p *Part) CoincideLength(part *Part) int {
+func (p *Part) CoincideLength(part *Part, minLength int) int {
 	rightLen := len(part.Line)
 
 	maxLength := len(p.Line)
@@ -51,7 +49,7 @@ func (p *Part) CoincideLength(part *Part) int {
 		maxLength = rightLen
 	}
 
-	for i := maxLength; i >= minLengthMatching; i-- {
+	for i := maxLength; i >= minLength; i-- {
 		if idx := strings.Index(p.Line[:i], part.Line[rightLen-i:]); idx != -1 {
 			return i
 		}
@@ -59,34 +57,51 @@ func (p *Part) CoincideLength(part *Part) int {
 	return -1
 }
 
-func (p *Part) CoincideWith(part *Part) bool {
-	return p.CoincideLength(part) > 0
+func (p *Part) CoincideWith(part *Part, minLength int) bool {
+	return p.CoincideLength(part, minLength) > -1
 }
 
-func (w *Wookie) Compute() {
+func (w *Wookie) Compute() bool {
+
+	minLength := len(w.Lines[0])
+
 	// prepare structures
 	for _, line := range w.Lines {
 		part := NewPart(line)
+		if len(line) < minLength {
+			minLength = len(line)
+		}
 		w.Parts = append(w.Parts, &part)
 	}
-	w.Missings = len(w.Parts)
 
-	for _, part := range w.Parts {
-		for _, existingPart := range w.Parts {
-			if part == existingPart {
-				continue
-			}
-			if existingPart.CoincideWith(part) {
-				part.Rights = append(part.Rights, existingPart)
-			}
-		}
-	}
-
-	// run recursive loop
 	startPart := Part{
 		Rights: w.Parts,
 	}
-	w.buildGenomeRec(&startPart)
+
+	for length := minLength; length > 0; length-- {
+		w.Missings = len(w.Parts)
+		for _, part := range w.Parts {
+			//part.Rights = part.Rights[:]
+			part.Rights = make([]*Part, 0)
+			part.Done = false
+		}
+		for _, part := range w.Parts {
+			for _, otherPart := range w.Parts {
+				if part == otherPart {
+					continue
+				}
+				if otherPart.CoincideWith(part, length) {
+					part.Rights = append(part.Rights, otherPart)
+				}
+			}
+		}
+
+		// run recursive loop
+		if ret := w.buildGenomeRec(&startPart); ret {
+			return true
+		}
+	}
+	return false
 }
 
 func (g *Genome) String() string {
@@ -94,7 +109,7 @@ func (g *Genome) String() string {
 	for i := 1; i < len(g.Parts)-1; i++ {
 		left := g.Parts[i]
 		right := g.Parts[i+1]
-		intersectionLength := right.CoincideLength(left)
+		intersectionLength := right.CoincideLength(left, 0)
 		output += right.Line[intersectionLength:]
 	}
 	return output
