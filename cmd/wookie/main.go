@@ -14,6 +14,7 @@ import (
 
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to file")
 var count = flag.Int("count", 1, "amount of iterations")
+var graphviz = flag.Bool("graphviz", false, "generate graphviz output")
 
 func main() {
 	flag.Parse()
@@ -32,11 +33,16 @@ func main() {
 	lines := strings.Split(strings.TrimSpace(string(input)), "\n")
 
 	var output string
+	var w wookie.Wookie
 	for i := 0; i < *count; i++ {
-		wookie := wookie.NewWookie(lines)
-		wookie.Compute()
-		output = wookie.Genome.String()
+		w = wookie.NewWookie(lines)
+		w.Compute()
+		output = w.Genome.String()
 	}
 	// only print latest output
-	fmt.Println(output)
+	if *graphviz {
+		fmt.Println(w.Graphviz())
+	} else {
+		fmt.Println(output)
+	}
 }

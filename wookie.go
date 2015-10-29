@@ -1,6 +1,11 @@
 package wookie
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/awalterschulze/gographviz"
+)
 
 type Part struct {
 	Line   string
@@ -13,6 +18,7 @@ type Wookie struct {
 	Parts    []*Part
 	Genome   Genome
 	Missings int
+	Length   int
 }
 
 type Genome struct {
@@ -87,11 +93,11 @@ func (w *Wookie) Compute() bool {
 		}
 	}
 
-	for length := minLength; length > 0; length-- {
+	for w.Length = minLength; w.Length > 0; w.Length-- {
 		// reset parts
 		startPart := Part{
 			Rights: map[int][]*Part{
-				length: w.Parts,
+				w.Length: w.Parts,
 			},
 		}
 		w.Missings = len(w.Parts)
@@ -100,7 +106,7 @@ func (w *Wookie) Compute() bool {
 		}
 
 		// run recursive loop
-		if ret := w.buildGenomeRec(&startPart, length); ret {
+		if ret := w.buildGenomeRec(&startPart, w.Length); ret {
 			return true
 		}
 	}
@@ -116,6 +122,69 @@ func (g *Genome) String() string {
 		output += right.Line[intersectionLength:]
 	}
 	return output
+}
+
+func (w *Wookie) Graphviz() string {
+	graph := gographviz.NewGraph()
+
+	graph.SetName("G")
+	graph.SetDir(true)
+
+	graph.AddNode("G", "start", map[string]string{"shape": "Mdiamond"})
+	graph.AddNode("G", "end", map[string]string{"shape": "Msquare"})
+	graph.AddEdge("start", w.Genome.Parts[1].Line, true, nil)
+	graph.AddEdge(w.Genome.Parts[len(w.Genome.Parts)-1].Line, "end", true, nil)
+
+	for _, part := range w.Genome.Parts {
+		if part.Line == "" {
+			continue
+		}
+		attrs := map[string]string{"color": "blue"}
+		graph.AddNode("G", part.Line, attrs)
+	}
+
+	for i := 1; i < len(w.Genome.Parts)-1; i++ {
+		left := w.Genome.Parts[i]
+		right := w.Genome.Parts[i+1]
+		attrs := map[string]string{
+			"color": "red",
+			"label": fmt.Sprintf("idx%d_len%d", i, right.CoincideLength(left)),
+		}
+		graph.AddEdge(left.Line, right.Line, true, attrs)
+	}
+
+	for _, part := range w.Parts {
+		for length, rights := range part.Rights {
+			if length < w.Length {
+				continue
+			}
+
+			attrs := map[string]string{
+				"label": fmt.Sprintf("len%d", length),
+				//"iterations": "nslimit1",
+				//"splines":    "line",
+				//"maxiter":    "1",
+				//"mclimit":    "1",
+			}
+			for _, right := range rights {
+				isSolution := false
+				for idx, solutionPart := range w.Genome.Parts {
+					if solutionPart == part {
+						if w.Genome.Parts[idx+1] == right {
+							isSolution = true
+						}
+						break
+					}
+				}
+				if isSolution {
+					continue
+				}
+
+				graph.AddEdge(part.Line, right.Line, true, attrs)
+			}
+		}
+	}
+	return graph.String()
 }
 
 func (w *Wookie) buildGenomeRec(part *Part, minLength int) bool {

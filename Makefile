@@ -5,6 +5,16 @@ all: wookie
 .PHONY: build
 build: wookie
 
+.PHONY: graphviz
+graphviz: data/wookie.svg
+
+data/wookie.svg: data/wookie.gv
+	dot -Tsvg -o $@ $<
+
+data/wookie.gv: wookie
+	rm -f data/wookie.svg
+	./wookie -graphviz ./data/wookie.txt > data/wookie.gv
+
 .PHONY: pprof
 pprof: data/wookie-100.prof data/wookie-200.prof data/wookie-1000.prof
 	rm -rf ./data/wookie-*.svg ./data/wookie-*.txt
