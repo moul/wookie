@@ -14,6 +14,5 @@ func main() {
 	input, _ := ioutil.ReadAll(stream)
 	wookie := wookie.NewWookie(strings.Split(strings.TrimSpace(string(input)), "\n"))
 	wookie.Compute()
-	genome := wookie.GetGenome()
-	fmt.Println(genome.String())
+	fmt.Println(wookie.Genome.String())
 }

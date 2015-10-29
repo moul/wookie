@@ -6,8 +6,7 @@ const minLengthMatching = 3
 
 type Part struct {
 	Line   string
-	Rights map[int][]*Part
-	Lefts  map[int][]*Part
+	Rights []*Part
 	Done   bool
 }
 
@@ -18,11 +17,15 @@ type Wookie struct {
 	Missings int
 }
 
+type Genome struct {
+	// Start *Part
+	Parts []*Part
+}
+
 func NewPart(line string) Part {
 	return Part{
 		Line:   line,
-		Rights: make(map[int][]*Part, 0),
-		Lefts:  make(map[int][]*Part, 0),
+		Rights: make([]*Part, 0),
 	}
 }
 
@@ -34,83 +37,70 @@ func NewWookie(lines []string) Wookie {
 	}
 }
 
-type Genome struct {
-	// Start *Part
-	Parts []*Part
-}
-
-func getEndLength(left, right string) int {
-	leftLen := len(left)
-	rightLen := len(right)
-	maxLength := leftLen
-	if rightLen < maxLength {
-		maxLength = rightLen
-	}
-
-	for i := maxLength; i >= minLengthMatching; i-- {
-		if idx := strings.Index(left[:i], right[rightLen-i:]); idx != -1 {
-			return i
-		}
-	}
-	return -1
-}
-
-func (w *Wookie) Compute() {
-	for _, line := range w.Lines {
-		part := NewPart(line)
-		w.Parts = append(w.Parts, &part)
-	}
-
-	//for _, line := range w.Lines {
-	for _, part := range w.Parts {
-		line := part.Line
-		//part := NewPart(line)
-
-		for _, existingPart := range w.Parts {
-			if part == existingPart {
-				continue
-			}
-			if endLength := getEndLength(line, existingPart.Line); endLength > -1 {
-				part.Lefts[endLength] = append(part.Lefts[endLength], existingPart)
-				existingPart.Rights[endLength] = append(existingPart.Rights[endLength], part)
-			}
-		}
-
-		//w.Parts = append(w.Parts, &part)
-	}
-
-	w.Missings = len(w.Parts)
-
-}
-
 func NewGenome() Genome {
 	return Genome{
 		Parts: make([]*Part, 0),
 	}
 }
 
-func (p *Part) MaxLength() int {
-	maxLength := 0
-	for length, _ := range p.Rights {
-		if length > maxLength {
-			maxLength = length
+func (p *Part) CoincideLength(part *Part) int {
+	rightLen := len(part.Line)
+
+	maxLength := len(p.Line)
+	if rightLen < maxLength {
+		maxLength = rightLen
+	}
+
+	for i := maxLength; i >= minLengthMatching; i-- {
+		if idx := strings.Index(p.Line[:i], part.Line[rightLen-i:]); idx != -1 {
+			return i
 		}
 	}
-	return maxLength
+	return -1
+}
+
+func (p *Part) CoincideWith(part *Part) bool {
+	return p.CoincideLength(part) > 0
+}
+
+func (w *Wookie) Compute() {
+	// prepare structures
+	for _, line := range w.Lines {
+		part := NewPart(line)
+		w.Parts = append(w.Parts, &part)
+	}
+	w.Missings = len(w.Parts)
+
+	for _, part := range w.Parts {
+		for _, existingPart := range w.Parts {
+			if part == existingPart {
+				continue
+			}
+			if existingPart.CoincideWith(part) {
+				part.Rights = append(part.Rights, existingPart)
+			}
+		}
+	}
+
+	// run recursive loop
+	startPart := Part{
+		Rights: w.Parts,
+	}
+	w.buildGenomeRec(&startPart)
 }
 
 func (g *Genome) String() string {
 	output := g.Parts[1].Line
 	for i := 1; i < len(g.Parts)-1; i++ {
-		leftPart := g.Parts[i]
-		rightPart := g.Parts[i+1]
-		intersectionLength := getEndLength(rightPart.Line, leftPart.Line)
-		output += rightPart.Line[intersectionLength:]
+		left := g.Parts[i]
+		right := g.Parts[i+1]
+		intersectionLength := right.CoincideLength(left)
+		output += right.Line[intersectionLength:]
 	}
 	return output
 }
 
-func (w *Wookie) BuildGenomesRec(part *Part) bool {
+func (w *Wookie) buildGenomeRec(part *Part) bool {
 	w.Genome.Parts = append(w.Genome.Parts, part)
 	if w.Missings < 1 {
 		return true
@@ -118,14 +108,12 @@ func (w *Wookie) BuildGenomesRec(part *Part) bool {
 	part.Done = true
 	w.Missings--
 
-	for _, rights := range part.Rights {
-		for _, right := range rights {
-			if right.Done {
-				continue
-			}
-			if finished := w.BuildGenomesRec(right); finished {
-				return true
-			}
+	for _, right := range part.Rights {
+		if right.Done {
+			continue
+		}
+		if finished := w.buildGenomeRec(right); finished {
+			return true
 		}
 	}
 
@@ -134,16 +122,4 @@ func (w *Wookie) BuildGenomesRec(part *Part) bool {
 	w.Missings++
 	part.Done = false
 	return false
-}
-
-func (w *Wookie) GetGenome() *Genome {
-	startPart := Part{
-		Rights: map[int][]*Part{
-			0: w.Parts,
-		},
-	}
-	if finished := w.BuildGenomesRec(&startPart); !finished {
-		return nil
-	}
-	return &(w.Genome)
 }

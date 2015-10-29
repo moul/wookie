@@ -62,9 +62,7 @@ func Test(t *testing.T) {
 	Convey("Testing Wookie", t, func() {
 		wookie := NewWookie(wookieData)
 		wookie.Compute()
-		//fmt.Println(wookie)
-		genome := wookie.GetGenome()
-		So(genome, ShouldNotBeNil)
-		So(genome.String(), ShouldEqual, expected)
+		So(wookie.Genome, ShouldNotBeNil)
+		So(wookie.Genome.String(), ShouldEqual, expected)
 	})
 }
