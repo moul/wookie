@@ -5,6 +5,25 @@ all: wookie
 .PHONY: build
 build: wookie
 
+.PHONY: pprof
+pprof: data/wookie-100.prof data/wookie-200.prof data/wookie-1000.prof
+	rm -rf ./data/wookie-*.svg ./data/wookie-*.txt
+	go tool pprof -svg -output=./data/wookie-100.svg wookie data/wookie-100.prof
+	go tool pprof -text -output=./data/wookie-100.txt wookie data/wookie-100.prof
+	go tool pprof -svg -output=./data/wookie-200.svg wookie data/wookie-200.prof
+	go tool pprof -text -output=./data/wookie-200.txt wookie data/wookie-200.prof
+	go tool pprof -svg -output=./data/wookie-1000.svg wookie data/wookie-1000.prof
+	go tool pprof -text -output=./data/wookie-1000.txt wookie data/wookie-1000.prof
+
+data/wookie-100.prof data/wookie-200.prof data/wookie-1000.prof: wookie
+	rm -f $@
+	$(eval COUNT := $(shell echo $@ | sed 's/.*-\([0-9][0-9]*\).*/\1/'))
+	./wookie -cpuprofile=$@ -count=$(COUNT) ./data/wookie.txt >/dev/null
+
+.PHONY: clean
+clean:
+	rm -f data/*.prof data/*.svg wookie
+
 wookie: $(SOURCES)
 	go get ./...
 	go build -o $@ ./cmd/$@
