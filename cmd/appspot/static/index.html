@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Wookie</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular-animate.js"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.3.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.3/ui-bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/theme-cobalt.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/worker-javascript.js"></script>
+    <script src="//angular-ui.github.io/ui-ace/dist/ui-ace.min.js"></script>
+
+    <script type="text/javascript">
+     angular.module("wookie", ['wookie.controllers','ngAnimate','ui.bootstrap', 'ui.ace']);
+     angular.module("wookie.controllers", [])
+            .controller('WookieCtrl', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
+       $scope.requestType = 'post';
+       $scope.url = '/resolve';
+       $scope.response = null;
+       $scope.errors = null;
+
+       $scope.inputHasChanged = false;
+
+       $scope.checkModel = {
+         optimize: false,
+         disableNetwork: false,
+         toArm: false,
+       };
+
+       $scope.$watchCollection('checkModel', function() {
+         $scope.sendRequest();
+       });
+
+       var cron = $interval(function() {
+         if ($scope.inputHasChanged) {
+           $scope.sendRequest();
+         }
+       }, 1000);
+
+       $scope.reqdata = "AAAAACAAAAGAAAATAAAC\n" +
+     "AAGCAAAGGAAAGTAAA\n" +
+     "AAGTGAAGTTAATACAATAGAAT\n" +
+     "ACACGACACTACAGCACAGGACAGTACAT\n" +
+     "ACCTGACCTTACGAGACGATACGCCACGCG\n" +
+     "ACGCGACGCTACGGCACGGGACGGTAC\n" +
+     "AGACTATACTCCACTCGACTCT\n" +
+     "AGGCTAGGGCAGGGGAGGGTAGGTCAGGT\n" +
+     "AGTAGATCAGATGAGATTAGCATAGCCC\n" +
+     "ATTAGCATAGCCCAGCCGAGCCTAGCG\n" +
+     "ATTCAATTGAATTTACACCACACG\n" +
+     "CAACAGAACATAACCCAACCGA\n" +
+     "CAGTCGAGTCTAGTGCAGTGGAGTGTAGTTCAG\n" +
+     "CCATACCCCACCCGACCCTACC\n" +
+     "CCATGCGATGCTATGGCATGGGATGGTATGT\n" +
+     "CCTACCGCACCGGACCGTACCTCACCT\n" +
+     "CCTAGCGCAGCGGAGCGTAGCTCAGCTGAGCTTA\n" +
+     "CCTCCCGGCCCGTCCCTGCCCTTCCGCGCCGCTCC\n" +
+     "CGAACCTAACGCAACGGAAC\n" +
+     "CTTAAGACAAGAGAAGATAAGCC\n" +
+     "CTTTGCTTTTGGGGGTGGGTTGGTGTGGT\n" +
+     "GAACGTAACTCAACTGAACTTA\n" +
+     "GATATTATCCCATCCGATCCTATCGCATCGGAT\n" +
+     "GCTCCGGGCCGGTCCGTGCCGTTCCTCGCCT\n" +
+     "GCTGAGCTTAGGATAGGCCAGGCGAGGCT\n" +
+     "GGTACGTCACGTGACGTTACTAGACT\n" +
+     "GTAAATCAAATGAAATTAACACAACAG\n" +
+     "GTACATCACATGACATTACCAGACCATACC\n" +
+     "GTATGTCATGTGATGTTATTCCATT\n" +
+     "GTGTGGTTTGTGTTGTTTT\n" +
+     "TAAACCAAACGAAACTAAAGCA\n" +
+     "TAAGCCAAGCGAAGCTAAGG\n" +
+     "TAAGGCAAGGGAAGGTAAGTCAAGTGA\n" +
+     "TAGAATATAATCCAATCGAATCTAATGC\n" +
+     "TAGTTCAGTTGAGTTTATATCATATGATATTA\n" +
+     "TCAGGTGAGGTTAGTATAGTCCAG\n" +
+     "TCGCCTCTCCTGGCCTGTCCTTGCCTTTCGCG\n" +
+     "TCGGATCGTATCTCATCTGATCTTATGCCAT\n" +
+     "TCGTCTCGTGGCGTGTCGTTGCG\n" +
+     "TCTAATGCAATGGAATGTAATTCAA\n" +
+     "TCTACTGCACTGGACTGTACTTCACTTG\n" +
+     "TCTGGGCTGGTCTGTGCTGTTCTTGGCTTGTCTTTGCT\n" +
+     "TGTCGTTGCGTTTCTCTGCTCTTCTGGGC\n" +
+     "TTCCATTCGATTCTATTGCATTGGATTGTAT\n" +
+     "TTCGCGGCGCGTCGCTGCGCTTCGG\n" +
+     "TTCGGCTCGGGGCGGGTCGGTGCGGTTCGTCTCG\n" +
+     "TTGACTTTAGAGCAGAGGAGAGTAG\n" +
+     "TTGTATTTCATTTGATTTTCCCCCGCCCCTCCC\n";
+
+       $scope.inputLoaded = function(_editor) {
+         $scope.inputEditor = _editor;
+       };
+       $scope.outputLoaded = function(_editor) {
+         $scope.outputEditor = _editor;
+       };
+       $scope.inputChanged = function(e) {
+         $scope.inputHasChanged = true;
+       };
+
+       $scope.sendRequest = function(){
+         $scope.inputHasChanged = false;
+         var data = {
+           Sequences: $scope.reqdata,
+           Options: {
+           }
+         };
+         $http.post($scope.url, data)
+              .success(function(data,status,headers,config) {
+           $scope.errors = {};
+           $scope.response = {};
+           $scope.response.data = data;
+           $scope.response.status = status;
+           $scope.response.headers = headers;
+           $scope.response.config = config;
+           $scope.outputEditor.setValue(data, 1);
+         })
+              .error(function(data,status,headers,config) {
+           $scope.errors = {};
+           $scope.response = {};
+           $scope.errors.data = data;
+           $scope.errors.status = status;
+           $scope.errors.headers = headers;
+           $scope.errors.config = config;
+           $scope.outputEditor.setValue(data, 1);
+         });
+       };
+     }]);
+    </script>
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/github.min.css">
+    <style>.ace_editor { height: 600px; }</style>
+  </head>
+  <body ng-app="wookie">
+    <div class="container" ng-controller="WookieCtrl">
+      <div class="row">
+        <div class="page-header">
+          <h1>Wookie's genome</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <form name="dpform" ng-submit="sendRequest()" class="well">
+            <fieldset>
+              <legend>Input</legend>
+              <div class="container-fluid">
+                <div class="row">
+                  <label for="reqdata">Sequences</label>
+                  <div ng-model="reqdata" name="reqdata" id="reqdata" language="text"
+                       ui-ace="{mode:'text',theme:'cobalt',onChange:inputChanged,onLoad:inputLoaded,useWrapMode:true}">
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <div class="well">
+            <fieldset>
+              <legend>Output</legend>
+              <label>Genome</label>
+              <div ui-ace="{mode:'text',theme:'cobalt',onLoad:outputLoaded,useWrapMode:true}" readonly></div>
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

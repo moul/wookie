@@ -52,3 +52,11 @@ cover:
 convey:
 	go get github.com/smartystreets/goconvey
 	goconvey -cover -port=10042 -workDir="$(realpath .)" -depth=-1
+
+.PHONY: goapp_serve
+goapp_serve:
+	goapp serve ./cmd/appspot/app.yaml
+
+.PHONY: goapp_deploy
+goapp_deploy:
+	goapp deploy -application wookie-genome ./cmd/appspot/app.yaml

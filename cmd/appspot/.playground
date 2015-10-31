@@ -1,0 +1,8 @@
+{
+    "project_name": "Wookie",
+    "project_description": "Assemble wookie's genome",
+    "show_files": [
+        "app.go",
+        "app.yaml"
+    ]
+}
