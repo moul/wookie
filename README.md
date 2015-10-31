@@ -7,6 +7,10 @@
 
 ![Wookie logo](https://raw.githubusercontent.com/moul/wookie/master/cmd/appspot/static/wookie.jpg)
 
+## Demo
+
+http://wookie-genome.appspot.com
+
 ## Install
 
 ```console
