@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
-	"strings"
 
 	"github.com/moul/wookie"
 )
@@ -30,15 +29,18 @@ func main() {
 
 	stream, _ := os.Open(flag.Arg(0))
 	input, _ := ioutil.ReadAll(stream)
-	lines := strings.Split(strings.TrimSpace(string(input)), "\n")
 
 	var output string
 	var w wookie.Wookie
 	for i := 0; i < *count; i++ {
-		w = wookie.NewWookie(lines)
-		w.Compute()
+		w = wookie.NewWookie(string(input))
+		err := w.Compute()
+		if err != nil {
+			log.Fatal(err)
+		}
 		output = w.Genome.String()
 	}
+
 	// only print latest output
 	if *graphviz {
 		fmt.Println(w.Graphviz())

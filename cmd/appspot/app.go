@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/moul/wookie"
 )
@@ -27,8 +26,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "POST parsing error: %v\n", err)
 		return
 	}
-	sequences := strings.Split(strings.TrimSpace(string(resolveRequest.Sequences)), "\n")
-	wook := wookie.NewWookie(sequences)
+	wook := wookie.NewWookie(resolveRequest.Sequences)
 	wook.Compute()
 	output := wook.Genome.String()
 

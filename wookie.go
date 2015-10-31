@@ -33,11 +33,12 @@ func NewPart(line string) Part {
 	}
 }
 
-func NewWookie(lines []string) Wookie {
+func NewWookie(input string) Wookie {
+	sequences := regexp.MustCompile("\\w+").FindAllString(input, -1)
 	return Wookie{
-		Lines:  lines,
-		Parts:  make([]*Part, 0),
-		Genome: NewGenome(),
+		Sequences: sequences,
+		Parts:     make([]*Part, 0),
+		Genome:    NewGenome(),
 	}
 }
 
