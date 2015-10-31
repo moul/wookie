@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/moul/wookie"
 )
@@ -27,8 +28,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	wook := wookie.NewWookie(resolveRequest.Sequences)
-	wook.Compute()
-	output := wook.Genome.String()
 
-	fmt.Fprintf(w, "%v\n", output)
+	// Timeout
+	timeout := make(chan bool, 1)
+	go func() {
+		time.Sleep(time.Second * 3)
+		timeout <- true
+	}()
+
+	computed := make(chan bool, 1)
+	go func() {
+		err = wook.Compute()
+		if err != nil {
+			fmt.Fprintf(w, "%v", err)
+		} else {
+			fmt.Fprintf(w, "%s", wook.Genome.String())
+		}
+		computed <- true
+	}()
+
+	select {
+	case <-computed:
+		// compute finished
+	case <-timeout:
+		fmt.Fprintf(w, "%s", "Timeout, this webapp times out after 3 seconds.\nUse the CLI version if you need to compute bigger genomes.\n\n    https://github.com/moul/wookie\n")
+	}
 }
