@@ -2,10 +2,14 @@ package wookie
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/awalterschulze/gographviz"
 )
+
+// minimal length of a sequence
+const MinSequenceLength = 2
 
 type Part struct {
 	Line   string
@@ -14,11 +18,11 @@ type Part struct {
 }
 
 type Wookie struct {
-	Lines    []string
-	Parts    []*Part
-	Genome   Genome
-	Missings int
-	Length   int
+	Sequences []string
+	Parts     []*Part
+	Genome    Genome
+	Missings  int
+	Length    int
 }
 
 type Genome struct {
@@ -56,7 +60,7 @@ func (p *Part) CoincideLength(part *Part) int {
 		maxLength = rightLen
 	}
 
-	for i := maxLength; i > 0; i-- {
+	for i := maxLength; i >= MinSequenceLength; i-- {
 		if idx := strings.Index(p.Line[:i], part.Line[rightLen-i:]); idx != -1 {
 			return i
 		}
@@ -64,12 +68,11 @@ func (p *Part) CoincideLength(part *Part) int {
 	return -1
 }
 
-func (w *Wookie) Compute() bool {
-
-	minLength := len(w.Lines[0])
+func (w *Wookie) Compute() error {
+	minLength := len(w.Sequences[0])
 
 	// prepare structures
-	for _, line := range w.Lines {
+	for _, line := range w.Sequences {
 		part := NewPart(line)
 		if len(line) < minLength {
 			minLength = len(line)
@@ -89,7 +92,7 @@ func (w *Wookie) Compute() bool {
 		}
 	}
 
-	for w.Length = minLength; w.Length > 0; w.Length-- {
+	for w.Length = minLength; w.Length >= MinSequenceLength; w.Length-- {
 		// reset parts
 		startPart := Part{
 			Rights: map[int][]*Part{
@@ -103,10 +106,10 @@ func (w *Wookie) Compute() bool {
 
 		// run recursive loop
 		if ret := w.buildGenomeRec(&startPart, w.Length); ret {
-			return true
+			return nil
 		}
 	}
-	return false
+	return fmt.Errorf("No such genome with these sequences")
 }
 
 func (g *Genome) String() string {
@@ -185,7 +188,7 @@ func (w *Wookie) Graphviz() string {
 
 func (w *Wookie) buildGenomeRec(part *Part, minLength int) bool {
 	w.Genome.Parts = append(w.Genome.Parts, part)
-	if w.Missings < 1 {
+	if w.Missings == 0 { // genome is complete
 		return true
 	}
 	part.Done = true
