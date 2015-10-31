@@ -5,6 +5,8 @@
 [![GoDoc](https://godoc.org/github.com/moul/wookie?status.svg)](https://godoc.org/github.com/moul/wookie)
 [![Coverage Status](https://coveralls.io/repos/moul/wookie/badge.svg?branch=master&service=github)](https://coveralls.io/github/moul/wookie?branch=master)
 
+![Wookie logo](https://raw.githubusercontent.com/moul/wookie/master/cmd/appspot/static/wookie.jpg)
+
 ## Install
 
 ```console
