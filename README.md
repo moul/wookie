@@ -15,10 +15,10 @@ http://wookie-genome.appspot.com
 
 ## Bonus
 
-- super fast
+- super fast ([1000 runs in 1.15s](https://github.com/moul/wookie/blob/master/data/wookie-1000.txt))
+- web version (API + form) ([link](#demo))
+- export graphs to graphviz ([link](https://github.com/moul/wookie/blob/master/data/wookie.svg))
 - automatically detects join length
-- web version (API + form)
-- export graphs to graphviz
 - flexible parsing of the sequences
 - unit tests with nice coverage score
 
