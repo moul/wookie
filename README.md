@@ -7,6 +7,8 @@
 
 ![Wookie logo](https://raw.githubusercontent.com/moul/wookie/master/cmd/appspot/static/wookie.jpg)
 
+Solution for [wookie challenge](https://github.com/jeannedhack/programmingChallenges/tree/master/wookie%20à%20poil%20dur)
+
 ## Demo
 
 http://wookie-genome.appspot.com
