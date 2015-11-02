@@ -13,6 +13,15 @@ Solution for [wookie challenge](https://github.com/jeannedhack/programmingChalle
 
 http://wookie-genome.appspot.com
 
+## Bonus
+
+- super fast
+- automatically detects join length
+- web version (API + form)
+- export graphs to graphviz
+- flexible parsing of the sequences
+- unit tests with nice coverage score
+
 ## Install
 
 ```console
