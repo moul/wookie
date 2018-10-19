@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/moul/wookie.svg?branch=master)](https://travis-ci.org/moul/wookie)
 [![GoDoc](https://godoc.org/github.com/moul/wookie?status.svg)](https://godoc.org/github.com/moul/wookie)
-[![Coverage Status](https://coveralls.io/repos/moul/wookie/badge.svg?branch=master&service=github)](https://coveralls.io/github/moul/wookie?branch=master)
+[![Coverage Status](https://coveralls.io/repos/moul/wookie/badge.svg?branch=master&service=github)](https://coveralls.io/github/moul/wookie?branch=master) [![GuardRails badge](https://badges.production.guardrails.io/moul/wookie.svg)](https://www.guardrails.io)
 
 ![Wookie logo](https://raw.githubusercontent.com/moul/wookie/master/cmd/appspot/static/wookie.jpg)
 
